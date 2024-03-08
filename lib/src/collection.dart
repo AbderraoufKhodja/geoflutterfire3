@@ -65,7 +65,7 @@ class GeoFireCollectionRef {
   Future<void> setPoint(String id, String field, double latitude, double longitude) {
     try {
       CollectionReference colRef = _collectionReference as CollectionReference;
-      var point = GeoFirePoint(latitude, longitude).data;
+      var point = GeoFirePoint(latitude, longitude).regionalData;
       return colRef.doc(id).set({'$field': point}, SetOptions(merge: true));
     } catch (e) {
       throw Exception('cannot call set on Query, use collection reference instead');
@@ -82,14 +82,13 @@ class GeoFireCollectionRef {
   ///
   /// `radius` in kilometers
   ///
-  /// `strictMode` if true, the query will only return documents within the given radius
   Query within({
     required GeoFirePoint center,
     required double radius,
     required String field,
     Precision precision = Precision.medium,
     required BlockSpacing blockLength,
-    bool strictMode = false,
+    // bool strictMode = false,
   }) {
     final blockNumber = Util.setBlockNum(radius, precision, blockLength);
 

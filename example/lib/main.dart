@@ -212,7 +212,7 @@ class _MyAppState extends State<MyApp> {
     GeoFirePoint geoFirePoint = geo.point(latitude: lat, longitude: lng);
     _firestore
         .collection('locations')
-        .add({'name': 'random name', 'position': geoFirePoint.data}).then((_) {
+        .add({'name': 'random name', 'position': geoFirePoint.regionalData}).then((_) {
       print('added ${geoFirePoint.hash} successfully');
     });
   }
@@ -223,7 +223,7 @@ class _MyAppState extends State<MyApp> {
     _firestore.collection('nestedLocations').add({
       'name': 'random name',
       'address': {
-        'location': {'position': geoFirePoint.data}
+        'location': {'position': geoFirePoint.regionalData}
       }
     }).then((_) {
       print('added ${geoFirePoint.hash} successfully');

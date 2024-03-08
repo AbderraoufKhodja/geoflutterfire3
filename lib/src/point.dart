@@ -21,7 +21,7 @@ class GeoFirePoint {
   }) {
     return _util.regionOf(
       hashString: hash,
-      blockLength: blockLength,
+      blockSpacing: blockLength,
       numBlocks: numBlocks,
     );
   }
@@ -50,27 +50,26 @@ class GeoFirePoint {
     return distanceBetween(from: coords, to: Coordinates(lat, lng));
   }
 
-  /// Returns a Map containing the geopoint and data related to the geopoint.
+  /// The regionalData method in the GeoFlutterFire3 library is designed to generate a map of geohashes around a central geopoint. This map includes the central geohash and a set of surrounding geohashes, each truncated to a certain precision. The precision is determined by the number of characters from the geohash.
   ///
-  /// The 'geopoint' key in the returned Map contains the geopoint of the current instance.
+  /// The method takes in five optional parameters of type RegionMappingConfig: tinyRMC, smallRMC, mediumRMC, longRMC, and hugeRMC. At least one of these parameters must be provided. If none is provided, an assertion error will be thrown. The mediumRMC parameter has a default value.
   ///
-  /// The 'data' key in the returned Map contains another Map. This inner Map has keys in the format 'precisionX',
-  /// where X is an index from 0 to 8. Each key corresponds to a List of neighboring hashes of the geopoint,
-  /// truncated to a certain precision. The precision corresponds to the number of characters from the geopoint's hash.
-  /// Each List also includes the center hash ('block0') of the geopoint truncated to the same precision.
+  /// The method also accepts a boolean parameter logMemoryUse, which defaults to false. If set to true, the method will compute and print the approximate memory usage of the returned data.
   ///
-  /// This getter is useful for obtaining a detailed breakdown of the geopoint's neighboring hashes at different precisions.
+  /// The returned map is structured as follows:
   ///
+  /// The 'geopoint' key contains the geopoint of the current instance.
+  /// The 'data' key contains another map. This inner map has keys in the format 'precisionX', where X is an index from 0 to 8. Each key corresponds to a list of neighboring hashes of the geopoint, truncated to a certain precision. Each list also includes the center hash ('block0') of the geopoint truncated to the same precision.
   /// Returns:
   /// A Map<String, dynamic> containing the geopoint and its related data.
-  Map<String, dynamic> data({
+  Map<String, dynamic> regionalData({
     RegionMappingConfig? tinyRMC,
     RegionMappingConfig? smallRMC,
     RegionMappingConfig? mediumRMC =
-        const RegionMappingConfig(blockLength: BlockSpacing.five, numBlocks: 12),
+        const RegionMappingConfig(blockSpacing: BlockSpacing.five, numSpacedBlock: 12),
     RegionMappingConfig? longRMC,
     RegionMappingConfig? hugeRMC,
-    bool logMemoryUse = false,
+    bool consolLogMemoryUse = false,
   }) {
     // Assert at least one of the RegionMappingConfig is not null
     assert(
@@ -95,8 +94,8 @@ class GeoFirePoint {
         final key = 'precision' + config.$1.toString();
         final value = GeoFirePoint.regionOf(
           hash: centerHash,
-          blockLength: config.$2.blockLength,
-          numBlocks: config.$2.numBlocks,
+          blockLength: config.$2.blockSpacing,
+          numBlocks: config.$2.numSpacedBlock,
         );
         return MapEntry(
           key,
@@ -105,7 +104,7 @@ class GeoFirePoint {
       },
     );
 
-    if (logMemoryUse) {
+    if (consolLogMemoryUse) {
       // Compute the approximate memory usage of the data
       var volume = 0;
       _data.forEach((key, value) {
@@ -202,13 +201,40 @@ class Coordinates {
   Coordinates(this.latitude, this.longitude);
 }
 
+/// A configuration class for mapping a region in GeoFlutterFire3.
+///
+/// This class is used to define the size and number of blocks for a region around a geopoint.
+/// The region is represented as a grid in a 2D plane, with each cell corresponding to a geohash.
+///
+/// Properties:
+/// - `blockSpacing`: The index multiplier to which a geohash is saved. It is an instance of `BlockSpacing` enum.
+///   The default value is `BlockSpacing.five`, which corresponds an interval of 4 blocks.
+/// - `numBlocks`: The number of blocks to include in the data. The default value is 12.
+///
+/// Example usage:
+/// ```dart
+/// var config = RegionMappingConfig(blockSpacing: BlockSpacing.five, numBlocks: 12);
+/// ```
+///
+/// The `blockSpacing` property determines the interval at which geohashes are selected from the grid. A smaller `blockSpacing` results in more geohashes being selected, as a geohash is picked at each `blockSpacing` index multiplier, which allows for more precise queries but at the cost of a larger data size and more memory usage. Conversely, a larger `blockSpacing` results in fewer geohashes being selected, as they are more widely spaced apart on the grid. Which reduces the data size and memory usage, but at the cost of less precise queries.
+///
+/// The `numSpacedBlock` property determines the number of spaced blocks to include in the region. A larger `numSpacedBlock` value results in a larger region, as more blocks are included. Which allows for longer range queries, but also at the expense of a larger data size and more memory usage.
+/// Conversely, a smaller `numSpacedBlock` value results in a smaller region, as fewer blocks are included with less memory usage and shorter range queries.
+///
+/// Here's a visual example of how the RegionMappingConfig works with blockSpacing = BlockSpacing.two and numSpacedBlock = 4.
+///
+/// <img src="https://github.com/AbderraoufKhodja/geoflutterfire3/blob/main/2spacing4blocks.png" width="200" height="200">
+///
+/// Here's a visual example of how the RegionMappingConfig might work with blockSpacing = BlockSpacing.three and numSpacedBlock = 3.
+///
+/// <img src="https://AbderraoufKhodja/geoflutterfire3/blob/main/3spacing3blocks.png" width="200" height="200">
 class RegionMappingConfig {
-  final BlockSpacing blockLength;
-  final int numBlocks;
+  final BlockSpacing blockSpacing;
+  final int numSpacedBlock;
 
   const RegionMappingConfig({
-    this.blockLength = BlockSpacing.five,
-    this.numBlocks = 12,
+    this.blockSpacing = BlockSpacing.five,
+    this.numSpacedBlock = 12,
   });
 }
 

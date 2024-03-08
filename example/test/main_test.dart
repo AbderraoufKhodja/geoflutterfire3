@@ -34,14 +34,16 @@ void main() {
     ];
 
     final cityGeoFirePoint = GeoFirePoint(cities[1].$1, cities[1].$2);
-    final marseilleData = cityGeoFirePoint.data(logMemoryUse: true);
+    final marseilleData = cityGeoFirePoint.regionalData(
+      consolLogMemoryUse: true,
+    );
 
     cities.forEach((city) {
       final cityGeoPoint = GeoFirePoint(city.$1, city.$2);
-      final data = cityGeoPoint.data(
+      final data = cityGeoPoint.regionalData(
           mediumRMC: RegionMappingConfig(
-        blockLength: BlockSpacing.five,
-        numBlocks: 60,
+        blockSpacing: BlockSpacing.five,
+        numSpacedBlock: 60,
       ));
 
       // Distance between city and marseille

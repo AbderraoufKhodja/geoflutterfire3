@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/opt/homebrew/Caskroom/flutter/3.7.8/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/khodja/Developemnt/fibali_project/geoflutterfire3-2.3.13/example"
+export "FLUTTER_APPLICATION_PATH=/Users/khodja/Development/fibali_project/geoflutterfire3-3.0.0/example"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

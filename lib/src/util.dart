@@ -214,11 +214,11 @@ class Util {
   /// The return value is a map where the keys are strings representing the region names, and the values are lists of strings representing the subregions within each region.
   Map<String, List<String>> regionOf({
     required String hashString,
-    required BlockSpacing blockLength,
+    required BlockSpacing blockSpacing,
     required int numBlocks,
   }) {
     final hashStringLength = hashString.length;
-    final length = blockLength.index + 1;
+    final spacing = blockSpacing.index + 1;
     final lonlat = decode(hashString);
     double? lat = lonlat['latitude'];
     double? lon = lonlat['longitude'];
@@ -259,7 +259,7 @@ class Util {
       final block = <String>[];
       final list = List<int>.generate(
         i * 2 + 1,
-        (j) => j * length - i * length,
+        (j) => j * spacing - i * spacing,
       );
 
       list.forEach((x) {
@@ -272,7 +272,7 @@ class Util {
         });
       });
 
-      data['block${i * length}'] = block;
+      data['block${i * spacing}'] = block;
     }
 
     return data;
