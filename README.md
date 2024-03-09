@@ -4,6 +4,10 @@
 
 **NB! `geoflutterfire3` is the revisited & improved version of [GeoFlutterFire](https://github.com/DarshanGowda0/GeoFlutterFire)**
 
+>![alt text](image.png)
+>
+>`geoflutterfire3` package was developped in mist of the developement of [Swappers](https://play.google.com/store/apps/details?id=com.deepdev.swappers) for the [Global Gamers Challenge](https://www.bing.com/ck/a?!&&p=c198d06b8c575c29JmltdHM9MTcwOTk0MjQwMCZpZ3VpZD0wNTJhZDExYi1lMTRlLTZjM2YtM2I3YS1jMjJjZTBkYzZkNWUmaW5zaWQ9NTE5OQ&ptn=3&ver=2&hsh=3&fclid=052ad11b-e14e-6c3f-3b7a-c22ce0dc6d5e&psq=global+gamers+challenge&u=a1aHR0cHM6Ly9mbHV0dGVyLmRldi9nbG9iYWwtZ2FtZXJz&ntb=1), a mobile app that connects swappers around the world and allows them to swap items easily and safely.
+
 ### `GeoFlutterFire3` addresses the following issues of the original `GeoFlutterFire`:
 
 - ~~range queries on multiple fields is not suppoerted by cloud_firestore at the moment, since this library already uses range query on `geohash` field, you cannot perform range queries with `GeoFireCollectionRef`.~~
@@ -20,12 +24,9 @@
 >GeoFlutterFire is designed as a lightweight add-on to cloud_firestore plugin. To keep things simple, GeoFlutterFire stores data in its own format within your Firestore database. This allows your existing data format and Security Rules to remain unchanged while still providing you with an easy solution for geo-queries.
 >
 >Heavily influenced by [GeoFireX](https://github.com/codediodeio/geofirex) :fire::fire: from [Jeff Delaney](https://github.com/codediodeio) :sunglasses:
+>
+>Quoted from [GeoFlutterFire](https://github.com/DarshanGowda0/GeoFlutterFire) \- Darshan Gowda
 
-Quoted from [GeoFlutterFire](https://github.com/DarshanGowda0/GeoFlutterFire) \- Darshan Gowda
-
-![alt text](image.png)
-
-This package was developped in mist of the developement of [Swappers](https://play.google.com/store/apps/details?id=com.deepdev.swappers) for the [Global Gamers Challenge](https://www.bing.com/ck/a?!&&p=c198d06b8c575c29JmltdHM9MTcwOTk0MjQwMCZpZ3VpZD0wNTJhZDExYi1lMTRlLTZjM2YtM2I3YS1jMjJjZTBkYzZkNWUmaW5zaWQ9NTE5OQ&ptn=3&ver=2&hsh=3&fclid=052ad11b-e14e-6c3f-3b7a-c22ce0dc6d5e&psq=global+gamers+challenge&u=a1aHR0cHM6Ly9mbHV0dGVyLmRldi9nbG9iYWwtZ2FtZXJz&ntb=1), a mobile app that connects swappers around the world and allows them to swap items easily and safely.
 
 ## Getting Started
 
