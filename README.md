@@ -23,7 +23,9 @@
 
 Quoted from [GeoFlutterFire](https://github.com/DarshanGowda0/GeoFlutterFire) \- Darshan Gowda
 
-![alt text](ggc.png)
+<div style="border: 2px solid darkblue; padding: 10px;">
+    <img src="ggc.png">
+</div>
 This package was developped in mist of the developement of [Swappers](https://play.google.com/store/apps/details?id=com.deepdev.swappers) for the [Global Gamers Challenge](https://www.bing.com/ck/a?!&&p=c198d06b8c575c29JmltdHM9MTcwOTk0MjQwMCZpZ3VpZD0wNTJhZDExYi1lMTRlLTZjM2YtM2I3YS1jMjJjZTBkYzZkNWUmaW5zaWQ9NTE5OQ&ptn=3&ver=2&hsh=3&fclid=052ad11b-e14e-6c3f-3b7a-c22ce0dc6d5e&psq=global+gamers+challenge&u=a1aHR0cHM6Ly9mbHV0dGVyLmRldi9nbG9iYWwtZ2FtZXJz&ntb=1), a mobile app that connects swappers around the world and allows them to swap items easily and safely.
 
 ## Getting Started
