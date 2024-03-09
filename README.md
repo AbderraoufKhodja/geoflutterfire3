@@ -7,9 +7,9 @@
 ### `GeoFlutterFire3` addresses the following issues of the original `GeoFlutterFire`:
 
 - ~~range queries on multiple fields is not suppoerted by cloud_firestore at the moment, since this library already uses range query on `geohash` field, you cannot perform range queries with `GeoFireCollectionRef`.~~
-  - `GeoFlutterFire3` supports range now supports range queries because the new library don't use range query internally.
+  - `GeoFlutterFire3` now supports firestore range `startAt() | endAt()` queries!
 - ~~`limit()` and `orderBy()` are not supported at the moment. `limit()` could be used to limit docs inside each hash individually which would result in running limit on all 9 hashes inside the specified radius. `orderBy()` is first run on `geohashes` in the library, hence appending `orderBy()` with another feild wouldn't produce expected results. Alternatively documents can be sorted on client side.~~
-  - `GeoFlutterFire3` now supports `limit()` and `orderBy()`.
+  - `GeoFlutterFire3` now supports firestore `limit()` and `orderBy()` queries!
 
 >## What is GeoFlutterFire?
 >
@@ -57,15 +57,15 @@ final _firestore = FirebaseFirestore.instance;
 
 ## Why the need for GeoFlutterFire3?
 
-GeoFlutterFire3 was developed to address some limitations and challenges faced with the previous versions of GeoFlutterFire. Here are some reasons why GeoFlutterFire3 was needed:
+GeoFlutterFire3 was developed to address some limitations and challenges faced with the previous versions of GeoFlutterFire. Here are some reasons why GeoFlutterFire3 is needed:
 
-1. **Support for Range Queries**: Previous versions of GeoFlutterFire did not support range queries. This meant that it was not possible to retrieve documents based on a range of values in a certain field. This limitation could significantly hinder the flexibility and efficiency of data retrieval. For instance, in a location-based application, the inability to perform range queries could make it difficult to find all entities within a certain distance range, leading to inefficient workarounds and potentially poorer user experience.
+1. **Support for range `startAt() | endAt()` queries**: Previous versions of GeoFlutterFire did not support range queries. This meant that it was not possible to retrieve documents based on a range of values in a certain field. This limitation could significantly hinder the flexibility and efficiency of data retrieval. For instance, in a location-based application, the inability to perform range queries could make it difficult to find all entities within a certain time or numerical range, leading to inefficient workarounds and potentially poorer user experience.
 
-2. **Support for `limit()` and `orderBy()`**: Previous versions of GeoFlutterFire did not support `limit()` and `orderBy()` methods. This meant that it was not possible to limit the number of documents returned by a query or to order the documents based on a certain field. This limitation could significantly hinder the flexibility and efficiency of data retrieval. For instance, in a location-based application, the inability to limit the number of documents returned by a query or to order the documents based on a certain field could make it difficult to manage the data and higher billing costs.
+2. **Support for firestore `limit()` and `orderBy()` queries**: Previous versions of GeoFlutterFire did not support firestore `limit()` and `orderBy()` query methods. This meant that it was not possible to limit the number of documents returned by a query or to order the documents based on a certain field. This limitation could significantly hinder the flexibility and efficiency of data retrieval. For instance, in a location-based application, the inability to limit the number of documents returned by a query or to order the documents based on a certain field could make it difficult to manage the data and lead to higher billing costs.
 
 ## How GeoFlutterFire3 models geo-queries with firestore?
 
-In previous version of `GeoFlutterFire`, each document in firestore is logged with a single `geohash` field with a specific precision 1-9. When a geoquery is performed, the library basically makes a batch of 9 range ordered queries on the `geohash` field.
+In previous version of `GeoFlutterFire`, each document in firestore is logged with a single `geohash` field with a specific precision 0-8. When a geoquery is performed, the library basically makes a batch of 9 range ordered queries on the `geohash` field.
 
 ```dart
    query firestore documents based on geographic [radius] from geoFirePoint [center]
@@ -89,9 +89,16 @@ In previous version of `GeoFlutterFire`, each document in firestore is logged wi
     // Rest of the code merges the queries
     ...
   }
+
+  /// construct a query for the [geoHash] and [field]
+  Query _queryPoint(String geoHash, String field) {
+    final end = '$geoHash~';
+    final temp = _collectionReference;
+    return temp.orderBy('$field.geohash').startAt([geoHash]).endAt([end]);
+  }
 ```
 
-In `GeoFlutterFire3`, instead of logging each firestore document with a single `geohash` field, the library uses a different approach. It logs firestore documents with regions of geohash, meaning that each document is loaded with a center hash and a range of surrounding hashes corresponding to some specified distance around the center hash. By doing so, we can retrieve documents in a specific range by the use of an arrayContainsAny query. This different in approach allows the library to support range queries and `limit()` and `orderBy()` methods.
+In `GeoFlutterFire3`, instead of logging each firestore document with a single `geohash` field, the library uses a different approach. ***It logs firestore documents with regions of geohash, meaning that each document is loaded with a center hash and a range of surrounding hashes corresponding to some specified distance around the center hash***. By doing so, we can retrieve documents in a specific range by the use of an `arrayContainsAny` query. This different in approach allows the library to support firestore range `startAt() | endAt()`, `limit()` and `orderBy()` queries.
 
 ## Writing Geo data
 
@@ -121,7 +128,7 @@ The method takes in five optional parameters of type `RegionMappingConfig`:
 
 At least one of these parameters must be provided. If none is provided, an assertion error will be thrown. The `mediumRMC` parameter has a default value.
 
-The method also accepts a boolean parameter `logMemoryUse`, which defaults to false. If set to true, the method will compute and print in the console the approximate memory usage of the returned data.
+The method also accepts a boolean parameter `consoleLogMemoryUse`, which defaults to false. If set to true, the method will compute and print in the console (debug mode) the approximate memory usage of the returned data.
 
 The returned map is structured as follows:
 
@@ -146,8 +153,6 @@ data --> Map<String, Map>>
   |precision8 --> ...
 ```
 
-This approach allows for more flexible and efficient querying of nearby documents in Firestore, as it reduces the number of documents that need to be fetched and processed.
-
 **Note:**
 By default, the `regionalData()` method uses the `mediumRMC` parameter to generate the regional data. This corresponds to a precision of 4 and a block size of 4.89km x 4.89km. Other precision will not be included unless a `RegionMappingConfig` parameter is passed to the method to configure the desired precision. For example, to include all of them you can write:
 ```dart
@@ -156,24 +161,19 @@ By default, the `regionalData()` method uses the `mediumRMC` parameter to genera
         logMemoryUse: true,
       tinyRMC: RegionMappingConfig(
         blockSpacing: BlockSpacing.two,
-        numBlocks: 12,
-      ),
+        numBlocks: 12),
       smallRMC: RegionMappingConfig(
         blockSpacing: BlockSpacing.three,
-        numBlocks: 5,
-      ),
+        numBlocks: 5),
       mediumRMC: RegionMappingConfig(
         blockSpacing: BlockSpacing.five,
-        numBlocks: 5,
-      ),
+        numBlocks: 5),
       longRMC: RegionMappingConfig(
         blockSpacing: BlockSpacing.one,
-        numBlocks: 3,
-      ),
+        numBlocks: 3),
       hugeRMC: RegionMappingConfig(
         blockSpacing: BlockSpacing.one,
-        numBlocks: 8,
-      ),
+        numBlocks: 8),
     );
   ```
   
@@ -184,12 +184,12 @@ By default, the `regionalData()` method uses the `mediumRMC` parameter to genera
 Properties:
 - `blockSpacing`: The index multiplier to which a geohash is saved. It is an instance of `BlockSpacing` enum.
    The default value is `BlockSpacing.five`, which corresponds an interval of 4 blocks.
-- `numBlocks`: The number of blocks to include in the data. The default value is 12.
+- `numSpacedBlock`: The number of blocks to include in the data. The default value is 12.
 
 Example usage:
 
 ```dart
-   final cityGeoFirePoint = GeoFirePoint(cities[1].$1, cities[1].$2);
+   final cityGeoFirePoint = GeoFirePoint(36.7525, 3.0420);
    final marseilleData = cityGeoFirePoint.regionalData(
       consoleLogMemoryUse: true,
      mediumRMC: RegionMappingConfig(blockSpacing: BlockSpacing.three, numBlocks: 12),
@@ -303,7 +303,7 @@ geoRef.within(
 Query the parent Firestore collection by geographic distance. It will return documents that exist within X kilometers of the center-point.
 `field` supports nested objects in the firestore document.
 
-**Note:** Use optional parameter `strictMode = true` to filter the documents strictly within the bound of given radius.
+<!-- **Note:** Use optional parameter `strictMode = true` to filter the documents strictly within the bound of given radius. -->
 
 Example:
 
